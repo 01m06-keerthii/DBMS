@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DBMS Keys Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #cce0ff;
+      margin: 40px;
+    }
+
+    h1 {
+      color: red;
+    }
+
+    h3 {
+      font-size: 1.2em;
+    }
+
+    .slide {
+      display: none;
+    }
+
+    .question {
+      background: #fff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .result {
+      font-weight: bold;
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: green;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px 5px 0 0;
+      background-color: #004080;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #003366;
+    }
+
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>DBMS Keys Quiz</h1>
+
+  <form id="quizForm"></form>
+
+  <div>
+    <button id="prevBtn" onclick="changeSlide(-1)">Previous</button>
+    <button id="nextBtn" onclick="changeSlide(1)">Next</button>
+    <button id="submitBtn" onclick="submitQuiz()" style="display:none;">Submit</button>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    const questions = [
+      { question: "1. Which of the following is always *unique* and *non-null*?", options: ['a) Candidate Key', 'b) Foreign Key', 'c) Primary Key', 'd) Super Key'], answer: 'c' },
+      { question: "2. The combination of student_id + course_code + semester is used as a key. What kind of key is this?", options: ['a) Foreign Key', 'b) Composite Key', 'c) Super Key', 'd) Surrogate Key'], answer: 'b' },
+      { question: "3. Which key can be *null* and is used to establish relationships between tables?", options: ['a) Primary Key', 'b) Alternate Key', 'c) Candidate Key', 'd) Foreign Key'], answer: 'd' },
+      { question: "4. If A is the primary key, what are B and C among multiple candidate keys?", options: ['a) Super Keys', 'b) Foreign Keys', 'c) Composite Keys', 'd) Alternate Keys'], answer: 'd' },
+      { question: "5. True or False: A table can have more than one primary key.", options: ['a) True', 'b) False'], answer: 'b' },
+      { question: "6. Which of the following is *not* a valid type of key in DBMS?", options: ['a) Foreign Key', 'b) Temporary Key', 'c) Composite Key', 'd) Candidate Key'], answer: 'b' },
+      { question: "7. Which key is used to uniquely identify tuples in a table?", options: ['a) Foreign Key', 'b) Super Key', 'c) Composite Key', 'd) Alternate Key'], answer: 'b' },
+      { question: "8. A foreign key in one table is usually a ______ in another table.", options: ['a) Composite Key', 'b) Primary Key', 'c) Super Key', 'd) Candidate Key'], answer: 'b' },
+      { question: "9. A key that consists of two or more attributes is called:", options: ['a) Surrogate Key', 'b) Foreign Key', 'c) Composite Key', 'd) Super Key'], answer: 'c' },
+      { question: "10. Which key may become a primary key in the future?", options: ['a) Candidate Key', 'b) Alternate Key', 'c) Foreign Key', 'd) Super Key'], answer: 'a' },
+      { question: "11. Super key is:", options: ['a) A subset of candidate keys', 'b) Always a single attribute', 'c) A set that uniquely identifies tuples', 'd) Never includes primary key'], answer: 'c' },
+      { question: "12. A surrogate key is:", options: ['a) Derived from foreign key', 'b) System-generated unique identifier', 'c) Another name for candidate key', 'd) A composite of multiple columns'], answer: 'b' },
+      { question: "13. An attribute that uniquely identifies each row in a table is:", options: ['a) Domain', 'b) Tuple', 'c) Key', 'd) Index'], answer: 'c' },
+      { question: "14. Which of the following is *not* allowed for a primary key?", options: ['a) Numeric value', 'b) Null value', 'c) Unique value', 'd) Single or multiple columns'], answer: 'b' },
+      { question: "15. A table with no candidate key is called:", options: ['a) Weak Entity', 'b) Normalized Table', 'c) Strong Entity', 'd) Derived Table'], answer: 'a' }
+    ];
+
+    const form = document.getElementById("quizForm");
+
+    // Group questions into slides of 5
+    const questionsPerSlide = 5;
+    const totalSlides = Math.ceil(questions.length / questionsPerSlide);
+    let currentSlide = 0;
+
+    for (let i = 0; i < totalSlides; i++) {
+      const slide = document.createElement("div");
+      slide.className = "slide";
+
+      for (let j = 0; j < questionsPerSlide; j++) {
+        const index = i * questionsPerSlide + j;
+        if (questions[index]) {
+          const q = questions[index];
+          const div = document.createElement("div");
+          div.className = "question";
+          div.innerHTML = `<h3>${q.question}</h3>` +
+            q.options.map(opt => `
+              <label><input type="radio" name="q${index}" value="${opt[0]}"> ${opt}</label>`
+            ).join('');
+          slide.appendChild(div);
+        }
+      }
+
+      form.appendChild(slide);
+    }
+
+    const slides = document.querySelectorAll(".slide");
+
+    function showSlide(n) {
+      slides.forEach((slide, i) => {
+        slide.style.display = i === n ? "block" : "none";
+      });
+
+      document.getElementById("prevBtn").style.display = n === 0 ? "none" : "inline-block";
+      document.getElementById("nextBtn").style.display = n === totalSlides - 1 ? "none" : "inline-block";
+      document.getElementById("submitBtn").style.display = n === totalSlides - 1 ? "inline-block" : "none";
+    }
+
+    function changeSlide(n) {
+      currentSlide += n;
+      showSlide(currentSlide);
+    }
+
+    function submitQuiz() {
+      let score = 0;
+      questions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected && selected.value === q.answer) {
+          score++;
+        }
+      });
+      document.getElementById("result").innerText = `You scored ${score} out of ${questions.length}`;
+    }
+
+    showSlide(currentSlide);
+  </script>
+
+</body>
+</html>
